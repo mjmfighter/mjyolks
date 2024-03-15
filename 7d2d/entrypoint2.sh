@@ -13,4 +13,4 @@ if [ -f logs/latest.log ]; then
   cp logs/latest.log logs/latest.log.0
 fi
 
-exec /home/container/entrypoint.sh "$@"
+exec /entrypoint.sh "$@"
