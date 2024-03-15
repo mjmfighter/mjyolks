@@ -1,4 +1,4 @@
-name: build nodejs
+name: build 7d2d
 on:
   workflow_dispatch:
   push:
@@ -8,6 +8,9 @@ jobs:
   push:
     name: "mjyolks:${{ matrix.tag }}"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     strategy:
       fail-fast: false
       matrix:
