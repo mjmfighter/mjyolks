@@ -16,6 +16,7 @@ fi
 if [ -n "$GITHUB_URL" ] && [ -n "$GITHUB_PRIVATE_KEY" ]; then
   echo "Cloning repository from $GITHUB_URL"
   mkdir -p /tmp/repo
+  mkdir -p /home/container/.ssh
   ssh-keyscan github.com >> /home/container/.ssh/known_hosts
   echo "$GITHUB_PRIVATE_KEY" > /home/container/.ssh/id_rsa
   chmod 600 /home/container/.ssh/id_rsa
