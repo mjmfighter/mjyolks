@@ -18,7 +18,12 @@ if [ -n "$GITHUB_URL" ] && [ -n "$GITHUB_PRIVATE_KEY" ]; then
   ssh-keyscan github.com >> /home/container/.ssh/known_hosts
   echo "$GITHUB_PRIVATE_KEY" > /home/container/.ssh/id_rsa
   chmod 600 /home/container/.ssh/id_rsa
-  git clone "$GITHUB_URL" /tmp/repo
+  # Clone the repository to /tmp/repo using GITHUB_BRANCH if it's set
+  if [ -n "$GITHUB_BRANCH" ]; then
+    git clone --single-branch --branch "$GITHUB_BRANCH" "$GITHUB_URL" /tmp/repo
+  else
+    git clone "$GITHUB_URL" /tmp/repo
+  fi
   cd /tmp/repo || exit 1
 
   # If GITHUB_FILE_POSTFIX is set, look for any files with that postfix and remove that postfix using find
