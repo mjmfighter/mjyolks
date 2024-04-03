@@ -201,8 +201,8 @@
             "field_type": "text"
         },
         {
-            "name": "Github Repository",
-            "description": "The GitHub repository to pull the server files from.",
+            "name": "Github URL",
+            "description": "The GitHub repository to pull the server files from.  Use the https address.",
             "env_variable": "GITHUB_URL",
             "default_value": "",
             "user_viewable": true,
@@ -211,9 +211,9 @@
             "field_type": "text"
         },
         {
-            "name": "Github Private Key",
-            "description": "The private key to use when cloning the repository.",
-            "env_variable": "GITHUB_PRIVATE_KEY",
+            "name": "Github Access Token",
+            "description": "The access token to use when cloning the repository.",
+            "env_variable": "GITHUB_ACCESS_TOKEN",
             "default_value": "",
             "user_viewable": false,
             "user_editable": false,

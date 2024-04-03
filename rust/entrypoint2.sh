@@ -12,22 +12,21 @@ if [ -f latest.log ]; then
   cp latest.log latest.log.0
 fi
 
-# If GITHUB_URL and GITHUB_PRIVATE_KEY are set, we'll use them to clone the repository to /tmp/repo (current user is container)
-if [ -n "$GITHUB_URL" ] && [ -n "$GITHUB_PRIVATE_KEY" ]; then
+# If GITHUB_URL and GITHUB_ACCESS_TOKEN are set, we'll use them to clone the repository to /tmp/repo (current user is container)
+if [ -n "$GITHUB_URL" ] && [ -n "$GITHUB_USERNAME"] && [ -n "$GITHUB_ACCESS_TOKEN" ]; then
   echo "Cloning repository from $GITHUB_URL"
   mkdir -p /tmp/repo
-  mkdir -p /home/container/.ssh
-  # ssh-keyscan github.com >> /home/container/.ssh/known_hosts
-  echo -e "$GITHUB_PRIVATE_KEY" > /home/container/.ssh/id_rsa
-  chmod 600 /home/container/.ssh/id_rsa
-  # Clone the repository to /tmp/repo using GITHUB_BRANCH if it's set
+
+  # Clone the repository. Use the GITHUB_ACCESS_TOEKN to authenticate
+  GITHUB_PHRASED_ADDRESS="https://${GITHUB_USERNAME}:${GITHUB_ACCESS_TOKEN}@${GITHUB_URL#https://}"
+
+  # Clone a specific branch if GITHUB_BRANCH is set, else the default branch
   if [ -n "$GITHUB_BRANCH" ]; then
-    echo "Cloning branch $GITHUB_BRANCH"
-    git clone --single-branch --branch "$GITHUB_BRANCH" "$GITHUB_URL" /tmp/repo
+    git clone --single-branch --branch "$GITHUB_BRANCH" "$GITHUB_PHRASED_ADDRESS" /tmp/repo
   else
-    echo "Cloning default branch"
-    git clone "$GITHUB_URL" /tmp/repo
+    git clone "$GITHUB_PHRASED_ADDRESS" /tmp/repo
   fi
+
   cd /tmp/repo || exit 1
 
   # If GITHUB_FILE_POSTFIX is set, look for any files with that postfix and remove that postfix using find
