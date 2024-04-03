@@ -22,8 +22,9 @@ ENV  		USER=container HOME=/home/container
 
 WORKDIR 	/home/container
 
-COPY 		./entrypoint.sh /entrypoint.sh
-COPY    ./entrypoint2.sh /entrypoint2.sh
-COPY 		./wrapper.js /wrapper.js
+COPY 		--chown=container:container ./entrypoint.sh /entrypoint.sh
+COPY    --chown=container:container ./entrypoint2.sh /entrypoint2.sh
+COPY 		--chown=container:container ./wrapper.js /wrapper.js
+RUN chmod +x /entrypoint.sh /entrypoint2.sh
 
 CMD			[ "/bin/bash", "/entrypoint2.sh" ]
