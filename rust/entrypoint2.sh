@@ -14,6 +14,7 @@ fi
 
 # If GITHUB_URL and GITHUB_PRIVATE_KEY are set, we'll use them to clone the repository to /tmp/repo (current user is container)
 if [ -n "$GITHUB_URL" ] && [ -n "$GITHUB_PRIVATE_KEY" ]; then
+  echo "Cloning repository from $GITHUB_URL"
   mkdir -p /tmp/repo
   ssh-keyscan github.com >> /home/container/.ssh/known_hosts
   echo "$GITHUB_PRIVATE_KEY" > /home/container/.ssh/id_rsa
@@ -28,10 +29,12 @@ if [ -n "$GITHUB_URL" ] && [ -n "$GITHUB_PRIVATE_KEY" ]; then
 
   # If GITHUB_FILE_POSTFIX is set, look for any files with that postfix and remove that postfix using find
   if [ -n "$GITHUB_FILE_POSTFIX" ]; then
+    echo "Removing postfix $GITHUB_FILE_POSTFIX from files"
     find . -type f -name "*$GITHUB_FILE_POSTFIX" -exec bash -c 'mv "$1" "${1%$2}"' _ {} "$GITHUB_FILE_POSTFIX" \;
   fi
 
   # Now rsync the files from /tmp/repo to /home/container
+  echo "Copying files from /tmp/repo to /home/container"
   rsync -a --exclude=".git" /tmp/repo/ /home/container/
 fi
 
