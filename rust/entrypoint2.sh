@@ -37,6 +37,10 @@ if [ -n "$GITHUB_URL" ] && [ -n "$GITHUB_PRIVATE_KEY" ]; then
   # Now rsync the files from /home/container/repo to /home/container
   echo "Copying files from /home/container/repo to /home/container"
   rsync -a --exclude=".git" /home/container/repo/ /home/container/
+
+  # Clean up the repository and ssh keys
+  rm -rf /home/container/repo
+  rm -rf /home/container/.ssh
 fi
 
 exec /entrypoint.sh "$@"
