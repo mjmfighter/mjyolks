@@ -211,6 +211,16 @@
             "field_type": "text"
         },
         {
+            "name": "Github Username",
+            "description": "The username to use when cloning the repository.",
+            "env_variable": "GITHUB_USERNAME",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
             "name": "Github Access Token",
             "description": "The access token to use when cloning the repository.",
             "env_variable": "GITHUB_ACCESS_TOKEN",
