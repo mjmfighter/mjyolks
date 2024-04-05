@@ -48,4 +48,6 @@ if [ -n "$GITHUB_URL" ]; then
   rm -rf /home/container/.ssh
 fi
 
+cd /home/container || exit 1
+
 exec bash /entrypoint.sh "$@"
