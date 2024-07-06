@@ -44,6 +44,10 @@ if [ -n "$GITHUB_URL" ]; then
 
   for DIR in "${SYNC_DIRS[@]}"; do
     if [ -d "$DIR" ]; then
+      if [ ! -d "/home/container/$DIR" ]; then
+        echo "Creating directory /home/container/$DIR"
+        mkdir -p "/home/container/$DIR"
+      fi
       echo "Copying files from /tmp/repo/$DIR/ to /home/container/$DIR/"
       rsync -av /tmp/repo/$DIR/ /home/container/$DIR/
     fi
@@ -51,6 +55,10 @@ if [ -n "$GITHUB_URL" ]; then
 
   for DIR in "${SYNC_DELETE_DIRS[@]}"; do
     if [ -d "$DIR" ]; then
+      if [ ! -d "/home/container/$DIR" ]; then
+        echo "Creating directory /home/container/$DIR"
+        mkdir -p "/home/container/$DIR"
+      fi
       echo "Copying (delete) files from /tmp/repo/$DIR/ to /home/container/$DIR/"
       rsync -av --delete /tmp/repo/$DIR/ /home/container/$DIR/
     fi
