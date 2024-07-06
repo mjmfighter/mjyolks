@@ -39,25 +39,20 @@ if [ -n "$GITHUB_URL" ]; then
     find . -type f -name "*$GITHUB_FILE_POSTFIX" -exec bash -c 'mv "$1" "${1%$2}"' _ {} "$GITHUB_FILE_POSTFIX" \;
   fi
 
-  EXCLUDE_DIRS=("carbon/data")
+  SYNC_DELETE_DIRS=("carbon/plugins" "carbon/configs" "carbon/extensions")
+  SYNC_DIRS=("carbon/data" "carbon/modules")
 
-  RSYNC_OPTS="-av --delete --exclude=.git"
-
-  for DIR in "${EXCLUDE_DIRS[@]}"; do
+  for DIR in "${SYNC_DIRS[@]}"; do
     if [ -d "$DIR" ]; then
-      RSYNC_OPTS+=" --exclude=$DIR"
+      echo "Copying files from /tmp/repo/$DIR/ to /home/container/$DIR/"
+      rsync -av /tmp/repo/$DIR/ /home/container/$DIR/
     fi
   done
 
-  # Rsync the files from /tmp/repo to /home/container
-  echo "Copying files from /tmp/repo to /home/container"
-  rsync $RSYNC_OPTS /tmp/repo/ /home/container/
-
-  # Rsync the exclude directories from /tmp/repo to /home/container with --delete
-  for DIR in "${EXCLUDE_DIRS[@]}"; do
+  for DIR in "${SYNC_DELETE_DIRS[@]}"; do
     if [ -d "$DIR" ]; then
-      echo "Copying files from $DIR to /home/container"
-      rsync -av /tmp/repo/$DIR/ /home/container/$DIR/
+      echo "Copying (delete) files from /tmp/repo/$DIR/ to /home/container/$DIR/"
+      rsync -av --delete /tmp/repo/$DIR/ /home/container/$DIR/
     fi
   done
 
