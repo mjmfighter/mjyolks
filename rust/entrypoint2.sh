@@ -41,7 +41,7 @@ if [ -n "$GITHUB_URL" ]; then
 
   EXCLUDE_DIRS=("carbon/data")
 
-  RSYNC_OPTS="-a --exclude=.git"
+  RSYNC_OPTS="-av --delete --exclude=.git"
 
   for DIR in "${EXCLUDE_DIRS[@]}"; do
     if [ -d "$DIR" ]; then
@@ -57,7 +57,7 @@ if [ -n "$GITHUB_URL" ]; then
   for DIR in "${EXCLUDE_DIRS[@]}"; do
     if [ -d "$DIR" ]; then
       echo "Copying files from $DIR to /home/container"
-      rsync -av --delete /tmp/repo/$DIR/ /home/container/$DIR/
+      rsync -av /tmp/repo/$DIR/ /home/container/$DIR/
     fi
   done
 
