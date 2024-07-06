@@ -40,7 +40,7 @@ if [ -n "$GITHUB_URL" ]; then
   fi
 
   SYNC_DELETE_DIRS=("carbon/plugins" "carbon/configs" "carbon/extensions")
-  SYNC_DIRS=("carbon/data" "carbon/modules")
+  SYNC_DIRS=("carbon/data" "carbon/modules" "server")
 
   for DIR in "${SYNC_DIRS[@]}"; do
     if [ -d "$DIR" ]; then
