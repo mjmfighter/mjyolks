@@ -39,13 +39,34 @@ if [ -n "$GITHUB_URL" ]; then
     find . -type f -name "*$GITHUB_FILE_POSTFIX" -exec bash -c 'mv "$1" "${1%$2}"' _ {} "$GITHUB_FILE_POSTFIX" \;
   fi
 
-  # Now rsync the files from /tmp/repo to /home/container
+  EXCLUDE_DIRS=("carbon/data")
+
+  RSYNC_OPTS="-a --exclude=.git"
+
+  for DIR in "${EXCLUDE_DIRS[@]}"; do
+    if [ -d "$DIR" ]; then
+      RSYNC_OPTS+=" --exclude=$DIR"
+    fi
+  done
+
+  # Rsync the files from /tmp/repo to /home/container
   echo "Copying files from /tmp/repo to /home/container"
-  rsync -a --exclude=".git" /tmp/repo/ /home/container/
+  rsync $RSYNC_OPTS /tmp/repo/ /home/container/
+
+  # Rsync the exclude directories from /tmp/repo to /home/container with --delete
+  for DIR in "${EXCLUDE_DIRS[@]}"; do
+    if [ -d "$DIR" ]; then
+      echo "Copying files from $DIR to /home/container"
+      rsync -av --delete /tmp/repo/$DIR/ /home/container/$DIR/
+    fi
+  done
 
   # Clean up the repository and ssh keys
+  echo "Cleaning up temporary files"
   rm -rf /tmp/repo
   rm -rf /home/container/.ssh
+
+  echo "Finished syncing files"
 fi
 
 cd /home/container || exit 1
