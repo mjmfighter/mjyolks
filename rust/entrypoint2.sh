@@ -38,9 +38,20 @@ if [ -n "$GITHUB_URL" ]; then
     echo "Removing postfix $GITHUB_FILE_POSTFIX from files"
     find . -type f -name "*$GITHUB_FILE_POSTFIX" -exec bash -c 'mv "$1" "${1%$2}"' _ {} "$GITHUB_FILE_POSTFIX" \;
   fi
-
-  SYNC_DELETE_DIRS=("carbon/plugins" "carbon/configs" "carbon/extensions")
+  SYNC_NEWER_DIRS=("carbon/extensions")
+  SYNC_DELETE_DIRS=("carbon/plugins" "carbon/configs")
   SYNC_DIRS=("carbon/data" "carbon/modules" "server")
+
+  for DIR in "${SYNC_NEWER_DIRS[@]}"; do
+    if [ -d "$DIR" ]; then
+      if [ ! -d "/home/container/$DIR" ]; then
+        echo "Creating directory /home/container/$DIR"
+        mkdir -p "/home/container/$DIR"
+      fi
+      echo "Copying newer files from /tmp/repo/$DIR/ to /home/container/$DIR/"
+      rsync -av --update /tmp/repo/$DIR/ /home/container/$DIR/
+    fi
+  done
 
   for DIR in "${SYNC_DIRS[@]}"; do
     if [ -d "$DIR" ]; then
@@ -60,7 +71,7 @@ if [ -n "$GITHUB_URL" ]; then
         mkdir -p "/home/container/$DIR"
       fi
       echo "Copying (delete) files from /tmp/repo/$DIR/ to /home/container/$DIR/"
-      rsync -av --delete /tmp/repo/$DIR/ /home/container/$DIR/
+      rsync -av --delete --exclude="*.ignore" --filter='dir-merge,- .ignore' /tmp/repo/$DIR/ /home/container/$DIR/
     fi
   done
 
