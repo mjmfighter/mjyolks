@@ -88,4 +88,4 @@ fi
 
 cd $HOME_DIR || exit 1
 
-exec bash -c '/entrypoint.sh "$@" > >(tee -a /var/log/entrypoint_output.log) 2> >(tee -a /var/log/entrypoint_output.log >&2)' -- "$@"
+exec bash /entrypoint.sh "$@"
