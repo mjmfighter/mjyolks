@@ -2,8 +2,11 @@
 
 set -e
 
+HOME_DIR="/home/container"
+TMP_DIR="$HOME_DIR/tmp"
+
 # Rotate the latest.log files
-cd /home/container || exit 1
+cd $HOME_DIR || exit 1
 
 if [ -f latest.log.0 ]; then
   cp latest.log.0 latest.log.1
@@ -15,7 +18,7 @@ fi
 # If GITHUB_URL and GITHUB_ACCESS_TOKEN are set, we'll use them to clone the repository to /tmp/repo (current user is container)
 if [ -n "$GITHUB_URL" ]; then
   echo "Cloning repository from $GITHUB_URL"
-  mkdir -p /tmp/repo
+  mkdir -p $TMP_DIR
 
   # Clone the repository. Use the GITHUB_ACCESS_TOEKN to authenticate
   if [ -n "$GITHUB_USERNAME" ] && [ -n "$GITHUB_ACCESS_TOKEN" ]; then
@@ -26,12 +29,12 @@ if [ -n "$GITHUB_URL" ]; then
 
   # Clone a specific branch if GITHUB_BRANCH is set, else the default branch
   if [ -n "$GITHUB_BRANCH" ]; then
-    git clone --single-branch --branch "$GITHUB_BRANCH" "$GITHUB_PHRASED_ADDRESS" /tmp/repo
+    git clone --single-branch --branch "$GITHUB_BRANCH" "$GITHUB_PHRASED_ADDRESS" $TMP_DIR
   else
-    git clone "$GITHUB_PHRASED_ADDRESS" /tmp/repo
+    git clone "$GITHUB_PHRASED_ADDRESS" $TMP_DIR
   fi
 
-  cd /tmp/repo || exit 1
+  cd $TMP_DIR || exit 1
 
   # If GITHUB_FILE_POSTFIX is set, look for any files with that postfix and remove that postfix using find
   if [ -n "$GITHUB_FILE_POSTFIX" ]; then
@@ -44,45 +47,45 @@ if [ -n "$GITHUB_URL" ]; then
 
   for DIR in "${SYNC_NEWER_DIRS[@]}"; do
     if [ -d "$DIR" ]; then
-      if [ ! -d "/home/container/$DIR" ]; then
-        echo "Creating directory /home/container/$DIR"
-        mkdir -p "/home/container/$DIR"
+      if [ ! -d "$HOME_DIR/$DIR" ]; then
+        echo "Creating directory $HOME_DIR/$DIR"
+        mkdir -p "$HOME_DIR/$DIR"
       fi
-      echo "Copying newer files from /tmp/repo/$DIR/ to /home/container/$DIR/"
-      rsync -av --update /tmp/repo/$DIR/ /home/container/$DIR/
+      echo "Copying newer files from $TMP_DIR/$DIR/ to $HOME_DIR/$DIR/"
+      rsync -av --update --delete $TMP_DIR/$DIR/ $HOME_DIR/$DIR/
     fi
   done
 
   for DIR in "${SYNC_DIRS[@]}"; do
     if [ -d "$DIR" ]; then
-      if [ ! -d "/home/container/$DIR" ]; then
-        echo "Creating directory /home/container/$DIR"
-        mkdir -p "/home/container/$DIR"
+      if [ ! -d "$HOME_DIR/$DIR" ]; then
+        echo "Creating directory $HOME_DIR/$DIR"
+        mkdir -p "$HOME_DIR/$DIR"
       fi
-      echo "Copying files from /tmp/repo/$DIR/ to /home/container/$DIR/"
-      rsync -av /tmp/repo/$DIR/ /home/container/$DIR/
+      echo "Copying files from $TMP_DIR/$DIR/ to $HOME_DIR/$DIR/"
+      rsync -av $TMP_DIR/$DIR/ $HOME_DIR/$DIR/
     fi
   done
 
   for DIR in "${SYNC_DELETE_DIRS[@]}"; do
     if [ -d "$DIR" ]; then
-      if [ ! -d "/home/container/$DIR" ]; then
-        echo "Creating directory /home/container/$DIR"
-        mkdir -p "/home/container/$DIR"
+      if [ ! -d "$HOME_DIR/$DIR" ]; then
+        echo "Creating directory $HOME_DIR/$DIR"
+        mkdir -p "$HOME_DIR/$DIR"
       fi
-      echo "Copying (delete) files from /tmp/repo/$DIR/ to /home/container/$DIR/"
-      rsync -av --delete --exclude="*.ignore" --filter='dir-merge,- .ignore' /tmp/repo/$DIR/ /home/container/$DIR/
+      echo "Copying (delete) files from $TMP_DIR/$DIR/ to $HOME_DIR/$DIR/"
+      rsync -av --delete --exclude="*.ignore" --filter='dir-merge,- .ignore' $TMP_DIR/$DIR/ $HOME_DIR/$DIR/
     fi
   done
 
   # Clean up the repository and ssh keys
   echo "Cleaning up temporary files"
-  rm -rf /tmp/repo
-  rm -rf /home/container/.ssh
+  rm -rf $TMP_DIR
+  rm -rf $HOME_DIR/.ssh
 
   echo "Finished syncing files"
 fi
 
-cd /home/container || exit 1
+cd $HOME_DIR || exit 1
 
 exec bash /entrypoint.sh "$@"
