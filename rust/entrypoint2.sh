@@ -52,7 +52,7 @@ if [ -n "$GITHUB_URL" ]; then
         mkdir -p "$HOME_DIR/$DIR"
       fi
       echo "Copying newer files from $TMP_DIR/$DIR/ to $HOME_DIR/$DIR/"
-      rsync -av --update --delete $TMP_DIR/$DIR/ $HOME_DIR/$DIR/
+      rsync -q -av --update --delete $TMP_DIR/$DIR/ $HOME_DIR/$DIR/
     fi
   done
 
@@ -63,7 +63,7 @@ if [ -n "$GITHUB_URL" ]; then
         mkdir -p "$HOME_DIR/$DIR"
       fi
       echo "Copying files from $TMP_DIR/$DIR/ to $HOME_DIR/$DIR/"
-      rsync -av $TMP_DIR/$DIR/ $HOME_DIR/$DIR/
+      rsync -q -av $TMP_DIR/$DIR/ $HOME_DIR/$DIR/
     fi
   done
 
@@ -74,7 +74,7 @@ if [ -n "$GITHUB_URL" ]; then
         mkdir -p "$HOME_DIR/$DIR"
       fi
       echo "Copying (delete) files from $TMP_DIR/$DIR/ to $HOME_DIR/$DIR/"
-      rsync -av --delete --exclude="*.ignore" --filter='dir-merge,- .ignore' $TMP_DIR/$DIR/ $HOME_DIR/$DIR/
+      rsync -q -av --delete --exclude="*.ignore" --filter='dir-merge,- .ignore' $TMP_DIR/$DIR/ $HOME_DIR/$DIR/
     fi
   done
 
@@ -88,4 +88,4 @@ fi
 
 cd $HOME_DIR || exit 1
 
-exec bash /entrypoint.sh "$@"
+exec bash -c '/entrypoint.sh "$@" > >(tee -a /var/log/entrypoint_output.log) 2> >(tee -a /var/log/entrypoint_output.log >&2)' -- "$@"
