@@ -33,7 +33,7 @@ sync_delete_with_ignore() {
 
     # Create a temporary exclude file for rsync
     local EXCLUDE_FILE
-    EXCLUDE_FILE=$(mktemp --tmpdir /home/container/.tmp)
+    EXCLUDE_FILE=$(mktemp)
     echo "$IGNORE_FILES" > "$EXCLUDE_FILE"
 
     # Step 2: Sync all files except those with corresponding .ignore files
