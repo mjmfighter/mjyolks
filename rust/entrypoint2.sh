@@ -2,8 +2,18 @@
 
 set -e
 
+. /sync_functions.sh
+
 HOME_DIR="/home/container"
-TMP_DIR="$HOME_DIR/tmp"
+TMP_GIT_DIR="$HOME_DIR/tmp"
+export TMPDIR="$HOME_DIR/.tmp"
+
+# Remove TMPDIR and TMP_GIT_DIR if they exist
+rm -rf $TMP_GIT_DIR
+rm -rf $TMPDIR
+
+# Create TMPDIR
+mkdir -p $TMPDIR
 
 # Rotate the latest.log files
 cd $HOME_DIR || exit 1
@@ -18,7 +28,7 @@ fi
 # If GITHUB_URL and GITHUB_ACCESS_TOKEN are set, we'll use them to clone the repository to /tmp/repo (current user is container)
 if [ -n "$GITHUB_URL" ]; then
   echo "Cloning repository from $GITHUB_URL"
-  mkdir -p $TMP_DIR
+  mkdir -p $TMP_GIT_DIR
 
   # Clone the repository. Use the GITHUB_ACCESS_TOEKN to authenticate
   if [ -n "$GITHUB_USERNAME" ] && [ -n "$GITHUB_ACCESS_TOKEN" ]; then
@@ -29,12 +39,12 @@ if [ -n "$GITHUB_URL" ]; then
 
   # Clone a specific branch if GITHUB_BRANCH is set, else the default branch
   if [ -n "$GITHUB_BRANCH" ]; then
-    git clone --single-branch --branch "$GITHUB_BRANCH" "$GITHUB_PHRASED_ADDRESS" $TMP_DIR
+    git clone --single-branch --branch "$GITHUB_BRANCH" "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR
   else
-    git clone "$GITHUB_PHRASED_ADDRESS" $TMP_DIR
+    git clone "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR
   fi
 
-  cd $TMP_DIR || exit 1
+  cd $TMP_GIT_DIR || exit 1
 
   # If GITHUB_FILE_POSTFIX is set, look for any files with that postfix and remove that postfix using find
   if [ -n "$GITHUB_FILE_POSTFIX" ]; then
@@ -51,8 +61,9 @@ if [ -n "$GITHUB_URL" ]; then
         echo "Creating directory $HOME_DIR/$DIR"
         mkdir -p "$HOME_DIR/$DIR"
       fi
-      echo "Copying newer files from $TMP_DIR/$DIR/ to $HOME_DIR/$DIR/"
-      rsync -q -av --update --delete $TMP_DIR/$DIR/ $HOME_DIR/$DIR/
+      echo "Copying newer files from $TMP_GIT_DIR/$DIR/ to $HOME_DIR/$DIR/"
+      # rsync -q -av --update --delete $TMP_GIT_DIR/$DIR/ $HOME_DIR/$DIR/
+      sync_delete_with_ignore "$TMP_GIT_DIR/$DIR" "$HOME_DIR/$DIR"
     fi
   done
 
@@ -62,8 +73,8 @@ if [ -n "$GITHUB_URL" ]; then
         echo "Creating directory $HOME_DIR/$DIR"
         mkdir -p "$HOME_DIR/$DIR"
       fi
-      echo "Copying files from $TMP_DIR/$DIR/ to $HOME_DIR/$DIR/"
-      rsync -q -av $TMP_DIR/$DIR/ $HOME_DIR/$DIR/
+      echo "Copying files from $TMP_GIT_DIR/$DIR/ to $HOME_DIR/$DIR/"
+      rsync -q -av $TMP_GIT_DIR/$DIR/ $HOME_DIR/$DIR/
     fi
   done
 
@@ -73,14 +84,15 @@ if [ -n "$GITHUB_URL" ]; then
         echo "Creating directory $HOME_DIR/$DIR"
         mkdir -p "$HOME_DIR/$DIR"
       fi
-      echo "Copying (delete) files from $TMP_DIR/$DIR/ to $HOME_DIR/$DIR/"
-      rsync -q -av --delete --exclude="*.ignore" --filter='dir-merge,- .ignore' $TMP_DIR/$DIR/ $HOME_DIR/$DIR/
+      echo "Copying (delete) files from $TMP_GIT_DIR/$DIR/ to $HOME_DIR/$DIR/"
+      # rsync -q -av --delete --exclude="*.ignore" --filter='dir-merge,- .ignore' $TMP_GIT_DIR/$DIR/ $HOME_DIR/$DIR/
+      sync_delete_with_ignore "$TMP_GIT_DIR/$DIR" "$HOME_DIR/$DIR" 
     fi
   done
 
   # Clean up the repository and ssh keys
   echo "Cleaning up temporary files"
-  rm -rf $TMP_DIR
+  rm -rf $TMP_GIT_DIR
   rm -rf $HOME_DIR/.ssh
 
   echo "Finished syncing files"
