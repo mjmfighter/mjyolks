@@ -58,14 +58,31 @@ function initialListener(data) {
   }
 }
 
+const ignoredStrings = [
+  "ERROR: Shader",
+  "WARNING: Shader",
+];
+
 function filterOutput(data) {
   const seenPercentage = {};
   const str = data.toString();
+
+  if (ignoredStrings.some((s) => str.includes(s))) {
+    // Only log ignored strings to console.log file
+    fs.appendFile("console.log", str).catch(console.log);
+    return;
+  }
 
   if (str.startsWith("Loading Prefab Bundle ")) {
     const percentage = str.substring("Loading Prefab Bundle ".length);
     if (seenPercentage[percentage]) return;
     seenPercentage[percentage] = true;
+  }
+
+  if (str.trim().contains("Server startup complete")) {
+    logProcessToConsole = false;
+    // Print the message again because ptero doesn't register it sometimes
+    console.log(str);
   }
 
   if (logProcessToConsole) console.log(str);
@@ -104,7 +121,7 @@ function handleRconOpen(ws) {
 
   // Send a command to the server to test the connection
   ws.send(createRconPacket("status"));
-  logProcessToConsole = false;
+  // logProcessToConsole = false;
 
   process.stdin.removeListener("data", initialListener);
 
