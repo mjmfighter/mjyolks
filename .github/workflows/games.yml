@@ -18,6 +18,7 @@ jobs:
           - 7d2d
           - rust
           - rust-test
+          - rust-new
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
