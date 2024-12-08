@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const fs = require("fs").promises;
+const fs = require("fs");
 const { exec } = require("child_process");
 const WebSocket = require("ws");
 
