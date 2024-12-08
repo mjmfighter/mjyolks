@@ -2,9 +2,8 @@
 
 set -e
 
-# Set NPM_ROOT for global installs
-export NPM_ROOT=$(npm root -g)
-echo "NPM_ROOT: $NPM_ROOT"
+# Set NPM_PATH for global installs
+export NPM_PATH=$(npm root -g)
 
 . /sync_functions.sh
 
