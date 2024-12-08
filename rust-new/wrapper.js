@@ -89,9 +89,9 @@ function pollRcon() {
     `ws://${serverHostname}:${serverPort}/${serverPassword}`
   );
 
-  ws.on("open", handleRconOpen(ws));
+  ws.on("open", () => handleRconOpen(ws));
   ws.on("message", handleRconMessage);
-  ws.on("error", () => handleRconError);
+  ws.on("error", handleRconError);
   ws.on("close", () => console.log("RCON connection closed."));
 }
 
