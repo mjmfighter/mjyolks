@@ -79,7 +79,7 @@ function filterOutput(data) {
     seenPercentage[percentage] = true;
   }
 
-  if (str.trim().contains("Server startup complete")) {
+  if (str.startsWith("Server startup complete")) {
     logProcessToConsole = false;
     // Print the message again because ptero doesn't register it sometimes
     console.log(str);
