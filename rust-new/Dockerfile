@@ -11,7 +11,7 @@ WORKDIR /home/container
 RUN			dpkg --add-architecture i386 \
         && apt update \
         && apt upgrade -y \
-        && apt install -y lib32gcc-s1 lib32stdc++6 unzip curl iproute2 tzdata libgdiplus libsdl2-2.0-0:i386 \
+        && apt install -y lib32gcc-s1 lib32stdc++6 unzip curl iproute2 tzdata libgdiplus libsdl2-2.0-0:i386 git findutils rsync \
         && curl -sL https://deb.nodesource.com/setup_21.x | bash - \
         && apt install -y nodejs \
         # && mkdir /node_modules \
