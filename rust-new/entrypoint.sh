@@ -2,6 +2,9 @@
 
 set -e
 
+# Set NPM_ROOT for global installs
+export NPM_ROOT=$(npm root -g)
+
 . /sync_functions.sh
 
 cd /home/container
