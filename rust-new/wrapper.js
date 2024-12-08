@@ -37,6 +37,7 @@ let rconWaitingToStart = false;
 
   gameProcess.on("exit", (code) => {
     console.log(`Rust process exited with code ${code}.`);
+    fs.appendFile("console.log", `Rust process exited with code ${code}.\n`).catch(console.log);
     process.exit(code);
   });
 
@@ -109,7 +110,7 @@ function pollRcon() {
   ws.on("open", () => handleRconOpen(ws));
   ws.on("message", handleRconMessage);
   ws.on("error", handleRconError);
-  ws.on("close", () => console.log("RCON connection closed."));
+  ws.on("close", handleRconClose);
 }
 
 function handleRconOpen(ws) {
@@ -134,7 +135,7 @@ function handleRconOpen(ws) {
 function handleRconMessage(data) {
   try {
     const json = JSON.parse(data);
-    if (json?.Message) {
+    if (json?.Message && json?.Type != "Chat") {
       console.log(json.Message);
       fs.appendFile("latest.log", `${json.Message}\n`).catch(console.log);
     }
@@ -144,6 +145,7 @@ function handleRconMessage(data) {
 }
 
 function handleRconError() {
+  console.log("Error connecting to RCON.  Retrying...");
   rconWaitingToStart = true;
   setTimeout(pollRcon, 5000);
 }
@@ -151,6 +153,8 @@ function handleRconError() {
 function handleRconClose() {
   if (!rconWaitingToStart) {
     console.log("RCON connection closed.");
+    fs.appendFile("latest.log", "RCON connection closed.\n").catch(console.log);
+    fs.appendFile("console.log", "RCON connection closed.  Killing process...\n").catch(console.log);
     process.exit();
   }
 }
