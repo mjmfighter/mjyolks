@@ -31,6 +31,14 @@ if [ -f latest.log ]; then
   cp latest.log latest.log.0
 fi
 
+# Rotate the console.log files
+if [ -f console.log.0 ]; then
+  cp console.log.0 console.log.1
+fi
+if [ -f console.log ]; then
+  cp console.log console.log.0
+fi
+
 ## if auto_update is not set or to 1 update
 if [ -z ${AUTO_UPDATE} ] || [ "${AUTO_UPDATE}" == "1" ]; then
 	./steamcmd/steamcmd.sh +force_install_dir /home/container +login anonymous +app_update 258550 +quit
