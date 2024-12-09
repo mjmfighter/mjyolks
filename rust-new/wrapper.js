@@ -8,47 +8,53 @@ const WebSocket = require("ws");
 let logProcessToConsole = true;
 let rconWaitingToStart = false;
 
-(async function main() {
+try {
+  fs.writeFileSync("latest.log", "");
+  fs.writeFileSync("console.log", "");
+  console.log("Log file cleared.");
+} catch (err) {
+  console.log("Error initializing log file:", err);
+  process.exit(1);
+}
+
+const args = process.argv.slice(process.execArgv.length + 2);
+const startupCmd = args.join(" ");
+
+if (!startupCmd) {
+  console.log("Error: Please specify a startup command.");
+  process.exit(1);
+}
+
+console.log("Starting Rust...");
+const gameProcess = exec(startupCmd);
+
+process.stdin.resume();
+process.stdin.setEncoding("utf8");
+process.stdin.on("data", initialListener);
+
+gameProcess.stdout.on("data", filterOutput);
+gameProcess.stderr.on("data", filterOutput);
+
+gameProcess.on("exit", (code) => {
+  console.log(`Rust process exited with code ${code}.`);
   try {
-    await fs.writeFile("latest.log", "");
-    console.log("Log file cleared.");
+    fs.appendFileSync("console.log", `Rust process exited with code ${code}.\n`);
   } catch (err) {
-    console.log("Error initializing log file:", err);
-    process.exit(1);
+    console.log("Error writing to console.log:", err);
   }
+  process.exit(code);
+});
 
-  const args = process.argv.slice(process.execArgv.length + 2);
-  const startupCmd = args.join(" ");
-
-  if (!startupCmd) {
-    console.log("Error: Please specify a startup command.");
-    process.exit(1);
-  }
-
-  console.log("Starting Rust...");
-  const gameProcess = exec(startupCmd);
-
-  process.stdin.resume();
-  process.stdin.setEncoding("utf8");
-  process.stdin.on("data", initialListener);
-
-  gameProcess.stdout.on("data", filterOutput);
-  gameProcess.stderr.on("data", filterOutput);
-
-  gameProcess.on("exit", (code) => {
-    console.log(`Rust process exited with code ${code}.`);
-    fs.appendFile("console.log", `Rust process exited with code ${code}.\n`).catch(console.log);
-    process.exit(code);
-  });
-
-  process.on("exit", () => {
-    console.log("Cleaning up...");
+process.on("exit", () => {
+  console.log("Cleaning up...");
+  if(gameProcess) {
     gameProcess.kill("SIGTERM");
-  });
+  }
+});
 
-  rconWaitingToStart = true;
-  pollRcon();
-})();
+rconWaitingToStart = true;
+pollRcon();
+
 
 function initialListener(data) {
   const command = data.toString().trim();
@@ -70,7 +76,11 @@ function filterOutput(data) {
 
   if (ignoredStrings.some((s) => str.includes(s))) {
     // Only log ignored strings to console.log file
-    fs.appendFile("console.log", str).catch(console.log);
+    try {
+      fs.appendFileSync("console.log", str);
+    } catch (err) {
+      console.log("Error writing to console.log:", err);
+    }
     return;
   }
 
@@ -88,7 +98,11 @@ function filterOutput(data) {
 
   if (logProcessToConsole) console.log(str);
   // Also append to console.log file
-  fs.appendFile("console.log", str).catch(console.log);
+  try {
+    fs.appendFileSync("console.log", str);
+  } catch (err) {
+    console.log("Error writing to console.log:", err);
+  }
 }
 
 function createRconPacket(command) {
@@ -137,7 +151,11 @@ function handleRconMessage(data) {
     const json = JSON.parse(data);
     if (json?.Message && json?.Type != "Chat") {
       console.log(json.Message);
-      fs.appendFile("latest.log", `${json.Message}\n`).catch(console.log);
+      try {
+        fs.appendFileSync("latest.log", `${json.Message}\n`);
+      } catch (err) {
+        console.log("Error writing to latest.log:", err);
+      }
     }
   } catch (err) {
     console.log("Error parsing RCON message:", err);
@@ -153,8 +171,12 @@ function handleRconError() {
 function handleRconClose() {
   if (!rconWaitingToStart) {
     console.log("RCON connection closed.");
-    fs.appendFile("latest.log", "RCON connection closed.\n").catch(console.log);
-    fs.appendFile("console.log", "RCON connection closed.  Killing process...\n").catch(console.log);
+    try {
+      fs.appendFileSync("latest.log", "RCON connection closed.\n");
+      fs.appendFileSync("console.log", "RCON connection closed.  Killing process...\n");
+    } catch (err) {
+      console.log("Error writing to logs on close:", err);
+    }
     process.exit();
   }
 }
