@@ -177,6 +177,9 @@ function handleRconClose() {
     } catch (err) {
       console.log("Error writing to logs on close:", err);
     }
-    process.exit();
+
+    if (gameProcess && !gameProcess.killed) {
+      gameProcess.kill("SIGTERM");
+    }
   }
 }
