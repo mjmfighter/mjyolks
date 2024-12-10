@@ -35,10 +35,17 @@ process.stdin.on("data", initialListener);
 gameProcess.stdout.on("data", filterOutput);
 gameProcess.stderr.on("data", filterOutput);
 
-gameProcess.on("exit", (code) => {
+gameProcess.on("exit", (code, signal) => {
   console.log(`Rust process exited with code ${code}.`);
   try {
-    fs.appendFileSync("console.log", `Rust process exited with code ${code}.\n`);
+    // Append to console.log file depending on code or signal
+    if (signal) {
+      fs.appendFileSync("console.log", `Rust process exited with signal ${signal}.\n`);
+    } else if (code) {
+      fs.appendFileSync("console.log", `Rust process exited with code ${code}.\n`);
+    } else {
+      fs.appendFileSync("console.log", "Rust process exited.\n");
+    }
   } catch (err) {
     console.log("Error writing to console.log:", err);
   }
@@ -173,13 +180,12 @@ function handleRconClose() {
     console.log("RCON connection closed.");
     try {
       fs.appendFileSync("latest.log", "RCON connection closed.\n");
-      fs.appendFileSync("console.log", "RCON connection closed.  Killing process...\n");
+      fs.appendFileSync("console.log", "RCON connection closed.\n");
     } catch (err) {
       console.log("Error writing to logs on close:", err);
     }
 
-    if (gameProcess && !gameProcess.killed) {
-      gameProcess.kill("SIGTERM");
-    }
+    // Try to reconnect, but longer timeout just in case server is being shutdown
+    setTimeout(pollRcon, 10000);
   }
 }
