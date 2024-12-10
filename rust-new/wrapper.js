@@ -143,7 +143,7 @@ function handleRconOpen(ws) {
 
   // Send a command to the server to test the connection
   ws.send(createRconPacket("status"));
-  // logProcessToConsole = false;
+  logProcessToConsole = false;
 
   process.stdin.removeListener("data", initialListener);
 
