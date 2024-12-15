@@ -157,3 +157,54 @@ sync_with_ignore() {
     # Clean up temporary exclude file
     rm "$EXCLUDE_FILE"
 }
+
+copy_missing_files() {
+    # Usage: copy_missing_files <source_directory> <destination_directory> [extensions...]
+
+    # Check if at least two arguments are provided
+    if [ "$#" -lt 2 ]; then
+        echo "Usage: copy_missing_files <source_directory> <destination_directory> [extensions...]"
+        return 1
+    fi
+
+    # Assign arguments to variables
+    local SOURCE="$1"
+    local DESTINATION="$2"
+    shift 2  # Shift the arguments to process extensions
+
+    # Collect extensions into an array
+    local EXTENSIONS=("$@")  # Remaining arguments are extensions
+
+    # Ensure the source directory exists
+    if [ ! -d "$SOURCE" ]; then
+        echo "Source directory '$SOURCE' does not exist."
+        return 1
+    fi
+
+    # Create the destination directory if it doesn't exist
+    if [ ! -d "$DESTINATION" ]; then
+        echo "Destination directory '$DESTINATION' does not exist. Creating it."
+        mkdir -p "$DESTINATION"
+    fi
+
+    # Step 1: Copy missing files from source to destination
+    rsync -av --ignore-existing "$SOURCE"/ "$DESTINATION"/
+
+    # Step 2: Process specified extensions
+    if [ "${#EXTENSIONS[@]}" -gt 0 ]; then
+        echo "Processing extensions: ${EXTENSIONS[*]}"
+        # Loop over each specified extension
+        for EXT in "${EXTENSIONS[@]}"; do
+            # Find files in the destination ending with the extension
+            find "$DESTINATION" -type f -name "*$EXT" -print0 | while IFS= read -r -d '' FILE; do
+                local NEW_FILE="${FILE%$EXT}"
+                if [ -e "$NEW_FILE" ]; then
+                    echo "Cannot rename '$FILE' to '$NEW_FILE' because '$NEW_FILE' already exists."
+                else
+                    mv "$FILE" "$NEW_FILE"
+                    echo "Renamed '$FILE' to '$NEW_FILE'"
+                fi
+            done
+        done
+    fi
+}
