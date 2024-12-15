@@ -3,7 +3,7 @@
 set -e
 
 # Set NODE_PATH for node to use global installs
-export NODE_PATH=$(npm root -g)
+# export NODE_PATH=$(npm root -g)
 
 . /sync_functions.sh
 
