@@ -58,7 +58,8 @@ if [[ "${FRAMEWORK}" == "carbon" ]]; then
 
     export DOORSTOP_ENABLED=1
     export DOORSTOP_TARGET_ASSEMBLY="$(pwd)/carbon/managed/Carbon.Preloader.dll"
-    MODIFIED_STARTUP="LD_PRELOAD=$(pwd)/libdoorstop.so ${MODIFIED_STARTUP}"
+    export LD_PRELOAD="$(pwd)/libdoorstop.so"
+    # MODIFIED_STARTUP="LD_PRELOAD=$(pwd)/libdoorstop.so ${MODIFIED_STARTUP}"
 
 elif [[ "$OXIDE" == "1" ]] || [[ "${FRAMEWORK}" == "oxide" ]]; then
     # Oxide: https://github.com/OxideMod/Oxide.Rust
@@ -150,4 +151,4 @@ cd $HOME_DIR || exit 1
 export LD_LIBRARY_PATH=$(pwd)/RustDedicated_Data/Plugins/x86_64:$(pwd)
 
 # Run the Server
-rust_monitor "${MODIFIED_STARTUP}"
+rust_monitor ${MODIFIED_STARTUP}
