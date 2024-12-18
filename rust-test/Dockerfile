@@ -21,6 +21,7 @@ RUN	dpkg --add-architecture i386 \
         # && npm install -g ws
 
 ENV     USER=container HOME=/home/container
+RUN     chown -R container:container /home/container
 USER    container
 
 COPY    entrypoint.sh /entrypoint.sh
