@@ -87,10 +87,10 @@ if [ -n "$GITHUB_URL" ]; then
   if [ -n "$GITHUB_BRANCH" ]; then
     echo "Cloning branch $GITHUB_BRANCH"
     echo git clone --single-branch --branch "$GITHUB_BRANCH" "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR
-    git clone --single-branch --branch "$GITHUB_BRANCH" "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR
+    git clone --single-branch --branch "$GITHUB_BRANCH" "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR || echo "Failed to clone branch $GITHUB_BRANCH"
   else
     echo git clone "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR
-    git clone "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR
+    git clone "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR || echo "Failed to clone repository"
   fi
 
   cd $TMP_GIT_DIR || exit 1
