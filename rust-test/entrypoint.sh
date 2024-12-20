@@ -2,6 +2,10 @@
 
 set -e
 
+# Redirect all stdout and stderr so that they are displayed
+# as normal and also written to terminal.log
+exec > >(tee -a terminal.log) 2>&1
+
 # Set NODE_PATH for node to use global installs
 # export NODE_PATH=$(npm root -g)
 
