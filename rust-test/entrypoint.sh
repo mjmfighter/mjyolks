@@ -74,7 +74,7 @@ fi
 # If GITHUB_URL and GITHUB_ACCESS_TOKEN are set, we'll use them to clone the repository to /tmp/repo (current user is container)
 if [ -n "$GITHUB_URL" ]; then
   echo "Cloning repository from $GITHUB_URL"
-  mkdir -p $TMP_GIT_DIR
+  # mkdir -p $TMP_GIT_DIR
 
   # Clone the repository. Use the GITHUB_ACCESS_TOEKN to authenticate
   if [ -n "$GITHUB_USERNAME" ] && [ -n "$GITHUB_ACCESS_TOKEN" ]; then
@@ -87,7 +87,7 @@ if [ -n "$GITHUB_URL" ]; then
   if [ -n "$GITHUB_BRANCH" ]; then
     echo "Cloning branch $GITHUB_BRANCH"
     echo git clone --single-branch --branch "$GITHUB_BRANCH" "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR
-    git clone --verbose --single-branch --branch "$GITHUB_BRANCH" "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR || echo "Failed to clone branch $GITHUB_BRANCH"
+    git clone --single-branch --branch "$GITHUB_BRANCH" "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR || echo "Failed to clone branch $GITHUB_BRANCH" 
   else
     echo git clone "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR
     git clone "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR || echo "Failed to clone repository"
