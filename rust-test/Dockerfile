@@ -1,4 +1,4 @@
-FROM    debian:bookworm-slim
+FROM    debian:bullseye-slim
 
 LABEL   author="Matthew M." maintainer="mjmfighter@steampunkvalley.com"
 LABEL   org.opencontainers.image.source="https://github.com/mjmfighter/mjyolks"
@@ -21,10 +21,10 @@ RUN     chmod +x /bin/rust_monitor
 ENV     USER=container HOME=/home/container
 USER    container
 
+WORKDIR /home/container
+
 COPY    entrypoint.sh /entrypoint.sh
 COPY    sync_functions.sh /sync_functions.sh
-
-WORKDIR /home/container
 
 # COPY    wrapper.js /wrapper.js
 
