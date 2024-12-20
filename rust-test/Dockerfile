@@ -6,11 +6,6 @@ LABEL   org.opencontainers.image.licenses=MIT
 
 ENV     DEBIAN_FRONTEND=noninteractive
 
-COPY    rust_monitor /bin/rust_monitor
-RUN     chmod +x /bin/rust_monitor
-
-WORKDIR /home/container
-
 RUN	dpkg --add-architecture i386 \
         && apt update \
         && apt upgrade -y \
@@ -20,12 +15,16 @@ RUN	dpkg --add-architecture i386 \
         && useradd -d /home/container -m container
         # && npm install -g ws
 
+COPY    rust_monitor /bin/rust_monitor
+RUN     chmod +x /bin/rust_monitor
+
 ENV     USER=container HOME=/home/container
-RUN     chown -R container:container /home/container
 USER    container
 
 COPY    entrypoint.sh /entrypoint.sh
 COPY    sync_functions.sh /sync_functions.sh
+
+WORKDIR /home/container
 
 # COPY    wrapper.js /wrapper.js
 
