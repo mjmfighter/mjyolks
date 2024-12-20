@@ -10,7 +10,7 @@ set -e
 cd /home/container
 
 HOME_DIR="/home/container"
-TMP_GIT_DIR="$HOME_DIR/tmp"
+TMP_GIT_DIR="$HOME_DIR/tmp-clone"
 export TMPDIR="$HOME_DIR/.tmp"
 
 # Make internal Docker IP address available to processes.
@@ -87,7 +87,7 @@ if [ -n "$GITHUB_URL" ]; then
   if [ -n "$GITHUB_BRANCH" ]; then
     echo "Cloning branch $GITHUB_BRANCH"
     echo git clone --single-branch --branch "$GITHUB_BRANCH" "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR
-    git clone --single-branch --branch "$GITHUB_BRANCH" "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR || echo "Failed to clone branch $GITHUB_BRANCH"
+    git clone --verbose --single-branch --branch "$GITHUB_BRANCH" "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR || echo "Failed to clone branch $GITHUB_BRANCH"
   else
     echo git clone "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR
     git clone "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR || echo "Failed to clone repository"
