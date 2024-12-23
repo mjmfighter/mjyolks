@@ -117,7 +117,7 @@ if [ -n "$GITHUB_URL" ]; then
       fi
       echo "Copying newer files from $TMP_GIT_DIR/$DIR/ to $HOME_DIR/$DIR/"
       # rsync -q -av --update --delete $TMP_GIT_DIR/$DIR/ $HOME_DIR/$DIR/
-      sync_delete_with_ignore "$TMP_GIT_DIR/$DIR" "$HOME_DIR/$DIR"
+      echo sync_delete_with_ignore "$TMP_GIT_DIR/$DIR" "$HOME_DIR/$DIR"
     fi
   done
 
@@ -128,7 +128,7 @@ if [ -n "$GITHUB_URL" ]; then
         mkdir -p "$HOME_DIR/$DIR"
       fi
       echo "Copying files from $TMP_GIT_DIR/$DIR/ to $HOME_DIR/$DIR/"
-      rsync -q -av $TMP_GIT_DIR/$DIR/ $HOME_DIR/$DIR/
+      echo rsync -q -av $TMP_GIT_DIR/$DIR/ $HOME_DIR/$DIR/
     fi
   done
 
@@ -140,7 +140,7 @@ if [ -n "$GITHUB_URL" ]; then
       fi
       echo "Copying (delete) files from $TMP_GIT_DIR/$DIR/ to $HOME_DIR/$DIR/"
       # rsync -q -av --delete --exclude="*.ignore" --filter='dir-merge,- .ignore' $TMP_GIT_DIR/$DIR/ $HOME_DIR/$DIR/
-      sync_delete_with_ignore "$TMP_GIT_DIR/$DIR" "$HOME_DIR/$DIR" 
+      echo sync_delete_with_ignore "$TMP_GIT_DIR/$DIR" "$HOME_DIR/$DIR" 
     fi
   done
 
