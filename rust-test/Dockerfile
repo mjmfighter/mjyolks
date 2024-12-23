@@ -13,18 +13,18 @@ RUN	dpkg --add-architecture i386 \
         && useradd -d /home/container -m container
 
 
-RUN     ASSET_PATTERN="x86_64-unknown-linux-musl.tar.gz" \
-        # Get the latest release data from GitHub
-        release_data=$(curl -s "https://api.github.com/repos/GitoxideLabs/gitoxide/releases/latest") \
-        # Parse the release data using jq to find the matching asset URL
+        RUN set -e; \
+        ASSET_PATTERN="x86_64-unknown-linux-musl.tar.gz"; \
+        release_data=$(curl -s "https://api.github.com/repos/GitoxideLabs/gitoxide/releases/latest"); \
         download_url=$(echo "$release_data" \
-        | jq -r '.assets[] | select(.name | test("'$ASSET_PATTERN'")) | .browser_download_url') \
+          | jq -r '.assets[] | select(.name | test("'$ASSET_PATTERN'")) | .browser_download_url'); \
         if [ -z "$download_url" ]; then \
-                echo "Error: Could not find an asset matching '$ASSET_PATTERN' in the latest release." \
-                exit 1 \
-        fi \
-        # Download the asset
-        curl -L "$download_url" | tar xzf - -C /bin --strip-components=1 --wildcards "*/ein" "*/gix"
+            echo "Error: Could not find an asset matching '$ASSET_PATTERN' in the latest release."; \
+            exit 1; \
+        fi; \
+        curl -L "$download_url" \
+          | tar xzf - -C /bin --strip-components=1 --wildcards "*/ein" "*/gix"
+    
 
 COPY    rust_monitor /bin/rust_monitor
 RUN     chmod +x /bin/rust_monitor
