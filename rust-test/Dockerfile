@@ -10,7 +10,7 @@ RUN	dpkg --add-architecture i386 \
         && apt update \
         && apt upgrade -y \
         && apt install -y lib32gcc-s1 lib32stdc++6 unzip curl iproute2 tzdata libgdiplus libsdl2-2.0-0:i386 git findutils rsync tar jq \
-        && useradd -d /home/container -m -u 999 -g 987 container
+        && useradd -d /home/container -m -u 999 -g 987 -o container
 
 
 RUN     curl -s https://api.github.com/repos/GitoxideLabs/gitoxide/releases/latest \
