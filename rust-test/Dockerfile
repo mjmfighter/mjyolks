@@ -1,4 +1,4 @@
-FROM    --platform=$TARGETOS/$TARGETARCH debian:bookworm
+FROM    --platform=$TARGETOS/$TARGETARCH ubuntu:latest
 
 LABEL   author="Matthew M." maintainer="mjmfighter@steampunkvalley.com"
 LABEL   org.opencontainers.image.source="https://github.com/mjmfighter/mjyolks"
@@ -22,8 +22,8 @@ RUN     curl -s https://api.github.com/repos/GitoxideLabs/gitoxide/releases/late
 COPY    rust_monitor /bin/rust_monitor
 RUN     chmod +x /bin/rust_monitor
 
-ENV     USER=container HOME=/home/container
-USER    container
+USER 	container
+ENV  	USER=container HOME=/home/container
 
 WORKDIR /home/container
 
