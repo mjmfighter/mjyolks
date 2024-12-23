@@ -1,4 +1,4 @@
-FROM    --platform=$TARGETOS/$TARGETARCH debian:bullseye-slim
+FROM    --platform=$TARGETOS/$TARGETARCH debian:bookworm-slim
 
 LABEL   author="Matthew M." maintainer="mjmfighter@steampunkvalley.com"
 LABEL   org.opencontainers.image.source="https://github.com/mjmfighter/mjyolks"
