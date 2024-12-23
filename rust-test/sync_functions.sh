@@ -38,7 +38,7 @@ sync_delete_with_ignore() {
 
     # Step 2: Sync all files except those with corresponding .ignore files
     echo rsync -av -q --delete --exclude-from="$EXCLUDE_FILE" "$SOURCE"/ "$DESTINATION"/
-    rsync -av -q --delete --exclude-from="$EXCLUDE_FILE" "$SOURCE"/ "$DESTINATION"/
+    rsync -vvv -av -q --delete --exclude-from="$EXCLUDE_FILE" "$SOURCE"/ "$DESTINATION"/
 
     # Step 3: Copy over the files with corresponding .ignore files only if they don't exist in the destination
     local FILE
