@@ -9,11 +9,11 @@ ENV     DEBIAN_FRONTEND=noninteractive
 RUN	dpkg --add-architecture i386 \
         && apt update \
         && apt upgrade -y \
-        && apt install -y lib32gcc-s1 lib32stdc++6 unzip curl iproute2 tzdata libgdiplus libsdl2-2.0-0:i386 git findutils rsync \
+        && apt install -y lib32gcc-s1 lib32stdc++6 unzip curl iproute2 tzdata libgdiplus libsdl2-2.0-0:i386 git findutils rsync tar jq \
         && useradd -d /home/container -m container
 
 
-        RUN set -e; \
+RUN set -e; \
         ASSET_PATTERN="x86_64-unknown-linux-musl.tar.gz"; \
         release_data=$(curl -s "https://api.github.com/repos/GitoxideLabs/gitoxide/releases/latest"); \
         download_url=$(echo "$release_data" \
