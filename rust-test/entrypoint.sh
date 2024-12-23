@@ -146,7 +146,7 @@ if [ -n "$GITHUB_URL" ]; then
 
   # Clean up the repository and ssh keys
   echo "Cleaning up temporary files"
-  rm -rf $TMP_GIT_DIR
+  # rm -rf $TMP_GIT_DIR
   rm -rf $HOME_DIR/.ssh
 
   echo "Finished syncing files"
