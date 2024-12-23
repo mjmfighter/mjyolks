@@ -90,11 +90,12 @@ if [ -n "$GITHUB_URL" ]; then
   # Clone a specific branch if GITHUB_BRANCH is set, else the default branch
   if [ -n "$GITHUB_BRANCH" ]; then
     echo "Cloning branch $GITHUB_BRANCH"
-    echo git clone --single-branch --branch "$GITHUB_BRANCH" "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR
-    GIT_TRACE=1 GIT_TRACE_PACKET=1 GIT_TRACE_PERFORMANCE=1 git clone --verbose --single-branch --branch "$GITHUB_BRANCH" "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR 2>&1
+    # echo git clone --single-branch --branch "$GITHUB_BRANCH" "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR
+    # GIT_TRACE=1 GIT_TRACE_PACKET=1 GIT_TRACE_PERFORMANCE=1 git clone --verbose --single-branch --branch "$GITHUB_BRANCH" "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR 2>&1
+    gix clone --ref "$GITHUB_BRANCH" "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR
   else
     echo git clone "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR
-    git clone "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR || echo "Failed to clone repository"
+    gix clone "$GITHUB_PHRASED_ADDRESS" $TMP_GIT_DIR
   fi
 
   cd $TMP_GIT_DIR || exit 1
