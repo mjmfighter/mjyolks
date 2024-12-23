@@ -13,17 +13,10 @@ RUN	dpkg --add-architecture i386 \
         && useradd -d /home/container -m container
 
 
-RUN set -e; \
-        ASSET_PATTERN="x86_64-unknown-linux-musl.tar.gz"; \
-        release_data=$(curl -s "https://api.github.com/repos/GitoxideLabs/gitoxide/releases/latest"); \
-        download_url=$(echo "$release_data" \
-          | jq -r '.assets[] | select(.name | test("'$ASSET_PATTERN'")) | .browser_download_url'); \
-        if [ -z "$download_url" ]; then \
-            echo "Error: Could not find an asset matching '$ASSET_PATTERN' in the latest release."; \
-            exit 1; \
-        fi; \
-        curl -L "$download_url" \
-          | tar xzf - -C /bin --strip-components=1 --wildcards "*/ein" "*/gix"
+RUN     curl -s https://api.github.com/repos/GitoxideLabs/gitoxide/releases/latest \
+        | jq -r '.assets[] | select(.name | test("x86_64-unknown-linux-musl.tar.gz")) | .browser_download_url' \
+        | xargs curl -L \
+        | tar xzf - -C /usr/local/bin --strip-components=1 --wildcards "*/ein" "*/gix"
     
 
 COPY    rust_monitor /bin/rust_monitor
