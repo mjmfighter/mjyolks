@@ -1,18 +1,7 @@
-FROM    --platform=$TARGETOS/$TARGETARCH debian:bullseye-slim
+FROM ghcr.io/pterodactyl/games:rust
 
-LABEL   author="Matthew M." maintainer="mjmfighter@steampunkvalley.com"
-LABEL   org.opencontainers.image.source="https://github.com/mjmfighter/mjyolks"
-LABEL   org.opencontainers.image.licenses=MIT
-
-ENV     DEBIAN_FRONTEND=noninteractive
-
-RUN	dpkg --add-architecture i386 \
-        && apt update \
-        && apt upgrade -y \
-        && apt install -y lib32gcc-s1 lib32stdc++6 unzip curl iproute2 tzdata libgdiplus libsdl2-2.0-0:i386 git findutils rsync tar jq \
-        && groupadd -g 987 container \
-        && useradd -d /home/container -m -u 999 -g 987 container
-
+USER root
+RUN apt-get update && apt-get install -y git findutils rsync
 
 RUN     curl -s https://api.github.com/repos/GitoxideLabs/gitoxide/releases/latest \
         | jq -r '.assets[] | select(.name | test("x86_64-unknown-linux-musl.tar.gz")) | .browser_download_url' \
@@ -23,14 +12,7 @@ RUN     curl -s https://api.github.com/repos/GitoxideLabs/gitoxide/releases/late
 COPY    rust_monitor /bin/rust_monitor
 RUN     chmod +x /bin/rust_monitor
 
-USER 	container
-ENV  	USER=container HOME=/home/container
+COPY entrypoint.sh /entrypoint.sh
+COPY sync_functions.sh /sync_functions.sh
 
-WORKDIR /home/container
-
-COPY    entrypoint.sh /entrypoint.sh
-COPY    sync_functions.sh /sync_functions.sh
-
-# COPY    wrapper.js /wrapper.js
-
-CMD     ["/bin/bash", "/entrypoint.sh"]
+USER container
