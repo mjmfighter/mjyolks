@@ -42,7 +42,7 @@ sync_delete_with_ignore() {
     ls -ld "$SOURCE"
     ls -ld "$DESTINATION"
     echo rsync -vvvvv -av --delete  "$SOURCE"/ "$DESTINATION"/
-    rsync -vvvvv -av --delete  "$SOURCE"/ "$DESTINATION"/
+    rsync -avvvv --stats --delete  "$SOURCE" "$DESTINATION"
 
     # Step 3: Copy over the files with corresponding .ignore files only if they don't exist in the destination
     local FILE
