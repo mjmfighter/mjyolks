@@ -1,7 +1,7 @@
 FROM ghcr.io/pterodactyl/games:rust
 
 USER root
-RUN apt-get update && apt-get install -y git findutils rsync
+RUN apt-get update && apt-get install -y git findutils rsync kq curl tar
 
 RUN     curl -s https://api.github.com/repos/GitoxideLabs/gitoxide/releases/latest \
         | jq -r '.assets[] | select(.name | test("x86_64-unknown-linux-musl.tar.gz")) | .browser_download_url' \
