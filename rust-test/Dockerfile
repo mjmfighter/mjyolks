@@ -16,3 +16,5 @@ COPY entrypoint.sh /entrypoint.sh
 COPY sync_functions.sh /sync_functions.sh
 
 USER container
+
+ENTRYPOINT ["/entrypoint.sh"]
