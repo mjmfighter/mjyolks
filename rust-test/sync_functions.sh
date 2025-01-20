@@ -31,16 +31,36 @@ sync_delete_with_ignore() {
     local IGNORE_FILES
     IGNORE_FILES=$(find "$SOURCE" -type f -name '*.ignore' -printf '%P\n' | sed 's/\.ignore$//')
 
-    # Create a temporary exclude file for rsync
-    local EXCLUDE_FILE
-    EXCLUDE_FILE=$(mktemp)
-    echo "$IGNORE_FILES" > "$EXCLUDE_FILE"
+    # Create a temporary directory to store file list
+    local TEMP_DIR
+    TEMP_DIR=$(mktemp -d)
+    local SOURCE_FILES="$TEMP_DIR/source_files"
+    local IGNORE_LIST="$TEMP_DIR/ignore_list"
 
-    # Step 2: Sync all files except those with corresponding .ignore files
-    rsync -av -q --delete --exclude-from="$EXCLUDE_FILE" "$SOURCE"/ "$DESTINATION"/
+    # Save ignore files list
+    echo "$IGNORE_FILES" > "$IGNORE_LIST"
+
+    # Generate list of all files in source
+    find "$SOURCE" -type f -not -name "*.ignore" -printf '%P\n' > "$SOURCE_FILES"
+
+    # Remove files in destination that don't exist in source (simulating rsync --delete)
+    find "$DESTINATION" -type f -printf '%P\n' | while IFS= read -r FILE; do
+        if ! grep -Fxq "$FILE" "$SOURCE_FILES" && ! grep -Fxq "$FILE" "$IGNORE_LIST"; then
+            rm -f "$DESTINATION/$FILE"
+            echo "Deleted '$DESTINATION/$FILE'"
+        fi
+    done
+
+    # Copy all files except those with corresponding .ignore files
+    while IFS= read -r FILE; do
+        if ! grep -Fxq "$FILE" "$IGNORE_LIST"; then
+            local DIR=$(dirname "$DESTINATION/$FILE")
+            mkdir -p "$DIR"
+            cp -p "$SOURCE/$FILE" "$DESTINATION/$FILE"
+        fi
+    done < "$SOURCE_FILES"
 
     # Step 3: Copy over the files with corresponding .ignore files only if they don't exist in the destination
-    local FILE
     while IFS= read -r FILE; do
         local SOURCE_FILE="$SOURCE/$FILE"
         local DEST_FILE="$DESTINATION/$FILE"
@@ -54,7 +74,7 @@ sync_delete_with_ignore() {
         else
             echo "Skipped '$FILE' as it already exists in the destination."
         fi
-    done <<< "$IGNORE_FILES"
+    done < "$IGNORE_LIST"
 
     # Step 4: Process specified extensions
     if [ "${#EXTENSIONS[@]}" -gt 0 ]; then
@@ -74,8 +94,8 @@ sync_delete_with_ignore() {
         done
     fi
 
-    # Clean up temporary exclude file
-    rm "$EXCLUDE_FILE"
+    # Clean up temporary directory
+    rm -rf "$TEMP_DIR"
 }
 
 sync_with_ignore() {
@@ -111,16 +131,22 @@ sync_with_ignore() {
     local IGNORE_FILES
     IGNORE_FILES=$(find "$SOURCE" -type f -name '*.ignore' -printf '%P\n' | sed 's/\.ignore$//')
 
-    # Create a temporary exclude file for rsync
-    local EXCLUDE_FILE
-    EXCLUDE_FILE=$(mktemp)
-    echo "$IGNORE_FILES" > "$EXCLUDE_FILE"
+    # Create a temporary file to store ignore list
+    local TEMP_DIR
+    TEMP_DIR=$(mktemp -d)
+    local IGNORE_LIST="$TEMP_DIR/ignore_list"
+    echo "$IGNORE_FILES" > "$IGNORE_LIST"
 
-    # Step 2: Sync all files except those with corresponding .ignore files
-    rsync -av -q --exclude-from="$EXCLUDE_FILE" "$SOURCE"/ "$DESTINATION"/
+    # Step 2: Copy all files except those with corresponding .ignore files
+    find "$SOURCE" -type f -not -name "*.ignore" -printf '%P\n' | while IFS= read -r FILE; do
+        if ! grep -Fxq "$FILE" "$IGNORE_LIST"; then
+            local DIR=$(dirname "$DESTINATION/$FILE")
+            mkdir -p "$DIR"
+            cp -p "$SOURCE/$FILE" "$DESTINATION/$FILE"
+        fi
+    done
 
     # Step 3: Copy over the files with corresponding .ignore files only if they don't exist in the destination
-    local FILE
     while IFS= read -r FILE; do
         local SOURCE_FILE="$SOURCE/$FILE"
         local DEST_FILE="$DESTINATION/$FILE"
@@ -134,7 +160,7 @@ sync_with_ignore() {
         else
             echo "Skipped '$FILE' as it already exists in the destination."
         fi
-    done <<< "$IGNORE_FILES"
+    done < "$IGNORE_LIST"
 
     # Step 4: Process specified extensions
     if [ "${#EXTENSIONS[@]}" -gt 0 ]; then
@@ -154,8 +180,8 @@ sync_with_ignore() {
         done
     fi
 
-    # Clean up temporary exclude file
-    rm "$EXCLUDE_FILE"
+    # Clean up temporary directory
+    rm -rf "$TEMP_DIR"
 }
 
 copy_missing_files() {
@@ -187,8 +213,15 @@ copy_missing_files() {
         mkdir -p "$DESTINATION"
     fi
 
-    # Step 1: Copy missing files from source to destination
-    rsync -av --ignore-existing "$SOURCE"/ "$DESTINATION"/
+    # Step 1: Copy only missing files from source to destination
+    find "$SOURCE" -type f -printf '%P\n' | while IFS= read -r FILE; do
+        if [ ! -e "$DESTINATION/$FILE" ]; then
+            local DIR=$(dirname "$DESTINATION/$FILE")
+            mkdir -p "$DIR"
+            cp -p "$SOURCE/$FILE" "$DESTINATION/$FILE"
+            echo "Copied '$SOURCE/$FILE' to '$DESTINATION/$FILE'"
+        fi
+    done
 
     # Step 2: Process specified extensions
     if [ "${#EXTENSIONS[@]}" -gt 0 ]; then
