@@ -128,7 +128,8 @@ if [ -n "$GITHUB_URL" ]; then
         mkdir -p "$HOME_DIR/$DIR"
       fi
       echo "Copying files from $TMP_GIT_DIR/$DIR/ to $HOME_DIR/$DIR/"
-      rsync -q -av $TMP_GIT_DIR/$DIR/ $HOME_DIR/$DIR/
+      # rsync -q -av $TMP_GIT_DIR/$DIR/ $HOME_DIR/$DIR/
+      cp -r "$TMP_GIT_DIR/$DIR/"* "$HOME_DIR/$DIR/"
       # cp -rf "$TMP_GIT_DIR/$DIR/." "$HOME_DIR/$DIR/"
     fi
   done
