@@ -33,4 +33,5 @@ COPY    sync_functions.sh /sync_functions.sh
 
 # COPY    wrapper.js /wrapper.js
 
-CMD     ["/bin/bash", "/entrypoint.sh"]
+ENTRYPOINT [ "/bin/bash", "/entrypoint.sh" ]
+# CMD     ["/bin/bash", "/entrypoint.sh"]
