@@ -1,4 +1,4 @@
-FROM ghcr.io/pterodactyl/games:rust
+FROM steamcmd/steamcmd:latest
 
 USER root
 RUN apt-get update && apt-get install -y git findutils rsync jq curl tar
