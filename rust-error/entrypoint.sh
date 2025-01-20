@@ -67,7 +67,7 @@ elif [[ "$OXIDE" == "1" ]] || [[ "${FRAMEWORK}" == "oxide" ]]; then
 fi
 
 # Test rsync
-rsync -avzh /home/container/carbon /home/container/carbon-test-rsync
+rsync /home/container/carbon /home/container/carbon-test-rsync
 
 # Make sure we are in the container directory
 cd $HOME_DIR || exit 1
