@@ -6,6 +6,8 @@ LABEL   org.opencontainers.image.licenses=MIT
 
 ENV     DEBIAN_FRONTEND=noninteractive
 
+USER root
+
 RUN	dpkg --add-architecture i386 \
         && apt update \
         && apt upgrade -y \
