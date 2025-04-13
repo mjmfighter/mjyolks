@@ -26,11 +26,11 @@ if [ -f latest.log ]; then
 fi
 
 # If GITHUB_URL and GITHUB_ACCESS_TOKEN are set, we'll use them to clone the repository to /tmp/repo (current user is container)
-if [ -n "$GITHUB_URL" ]; then
+if [ -n "$GITHUB_URL" ] && [ "$GITHUB_SYNC" -eq 1 ]; then
   echo "Cloning repository from $GITHUB_URL"
   mkdir -p $TMP_GIT_DIR
 
-  # Clone the repository. Use the GITHUB_ACCESS_TOEKN to authenticate
+  # Clone the repository. Use the GITHUB_ACCESS_TOKEN to authenticate
   if [ -n "$GITHUB_USERNAME" ] && [ -n "$GITHUB_ACCESS_TOKEN" ]; then
     GITHUB_PHRASED_ADDRESS="https://${GITHUB_USERNAME}:${GITHUB_ACCESS_TOKEN}@${GITHUB_URL#https://}"
   else
