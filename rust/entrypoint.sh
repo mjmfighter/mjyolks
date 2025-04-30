@@ -43,7 +43,7 @@ if [[ -n "${carbon_configs[$FRAMEWORK]}" ]]; then
     IFS=' ' read -r build_type tarball message <<< "${configs[$FRAMEWORK]}"
         
     # Display update message
-    Info "$message"
+    echo "$message"
 
     curl -sSL "https://github.com/CarbonCommunity/Carbon/releases/download/${build_type}/${tarball}" | tar zx
     echo "Done updating Carbon!"
