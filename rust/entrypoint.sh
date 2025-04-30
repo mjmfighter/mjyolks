@@ -44,6 +44,7 @@ if [[ -n "${carbon_configs[$FRAMEWORK]}" ]]; then
         
     # Display update message
     echo "$message"
+    echo "Downloading url: https://github.com/CarbonCommunity/Carbon/releases/download/${build_type}/${tarball}"
 
     curl -sSL "https://github.com/CarbonCommunity/Carbon/releases/download/${build_type}/${tarball}" | tar zx
     echo "Done updating Carbon!"
