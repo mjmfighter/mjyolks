@@ -40,7 +40,7 @@ MODIFIED_STARTUP=$(eval echo -e ${STARTUP} | sed -e 's/{{/${/g' -e 's/}}/}/g')
 echo ":/home/container$ ${MODIFIED_STARTUP}"
 
 if [[ -n "${carbon_configs[$FRAMEWORK]}" ]]; then
-    IFS=' ' read -r build_type tarball message <<< "${configs[$FRAMEWORK]}"
+    IFS=' ' read -r build_type tarball message <<< "${carbon_configs[$FRAMEWORK]}"
         
     # Display update message
     echo "$message"
