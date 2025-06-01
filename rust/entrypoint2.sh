@@ -51,9 +51,9 @@ if [ -n "$GITHUB_URL" ] && [ "$GITHUB_SYNC" -eq 1 ]; then
     echo "Removing postfix $GITHUB_FILE_POSTFIX from files"
     find . -type f -name "*$GITHUB_FILE_POSTFIX" -exec bash -c 'mv "$1" "${1%$2}"' _ {} "$GITHUB_FILE_POSTFIX" \;
   fi
-  SYNC_NEWER_DIRS=("carbon/extensions")
+  SYNC_NEWER_DIRS=("carbon/extensions" "carbon/data")
   SYNC_DELETE_DIRS=("carbon/plugins" "carbon/configs")
-  SYNC_DIRS=("carbon/data" "carbon/modules" "carbon/managed/modules" "HarmonyMods_Data" "server")
+  SYNC_DIRS=("carbon/modules" "carbon/managed/modules" "HarmonyMods_Data" "server")
 
   for DIR in "${SYNC_NEWER_DIRS[@]}"; do
     if [ -d "$DIR" ]; then
