@@ -1,9 +1,25 @@
 #!/usr/bin/env bash
-set -e
+set -eo pipefail
+
+# Opt-in shell tracing for debugging: set DEBUG_ENTRYPOINT=1 in the egg
+if [ "${DEBUG_ENTRYPOINT:-0}" = "1" ]; then
+    set -x
+fi
 
 HOME_DIR="/home/container"
 TMP_GIT_DIR="$HOME_DIR/tmp-git"
 export TMPDIR="$HOME_DIR/.tmp"
+
+echo "============================================================"
+echo " mjyolks/rust entrypoint starting"
+echo " image:       ${IMAGE_TAG:-ghcr.io/mjmfighter/mjyolks:rust}"
+echo " framework:   ${FRAMEWORK:-vanilla}"
+echo " auto-update: ${AUTO_UPDATE:-1}"
+echo " github-sync: ${GITHUB_SYNC:-auto}"
+echo "============================================================"
+
+# Report which line crashed if set -e fires unexpectedly
+trap 'rc=$?; echo "[entrypoint] FATAL: exited $rc at line $LINENO (last cmd: $BASH_COMMAND)" >&2' ERR
 
 declare -A CARBON_BUILDS=(
     ["carbon"]="production_build Carbon.Linux.Release.tar.gz Updating Carbon..."
@@ -123,9 +139,10 @@ setup_env() {
     # Rotate log files (wrapper.js writes both)
     cd "$HOME_DIR"
     for base in latest.log console.log; do
-        [ -f "${base}.0" ] && cp "${base}.0" "${base}.1"
-        [ -f "${base}" ] && cp "${base}" "${base}.0"
+        if [ -f "${base}.0" ]; then cp "${base}.0" "${base}.1"; fi
+        if [ -f "${base}" ]; then cp "${base}" "${base}.0"; fi
     done
+    return 0
 }
 
 derive_steam_branch() {
@@ -143,8 +160,10 @@ derive_steam_branch() {
         carbon-aux4|carbon-aux4-minimal)         export SRCDS_BETAID="aux04"   ;;
     esac
 
-    [ -n "$SRCDS_BETAID" ] && \
+    if [ -n "$SRCDS_BETAID" ]; then
         echo "FRAMEWORK=$FRAMEWORK -> using Rust game beta branch '$SRCDS_BETAID'"
+    fi
+    return 0
 }
 
 update_steamcmd() {
@@ -276,15 +295,25 @@ launch_server() {
 # --------------------------------------------------------------------
 
 cd "$HOME_DIR"
+
+echo "[entrypoint] stage: setup_env"
 setup_env
+
+echo "[entrypoint] stage: derive_steam_branch"
 derive_steam_branch
 
 if [ -z "${AUTO_UPDATE}" ] || [ "${AUTO_UPDATE}" = "1" ]; then
+    echo "[entrypoint] stage: update_steamcmd"
     update_steamcmd
 else
-    echo "AUTO_UPDATE=${AUTO_UPDATE}, skipping steamcmd update."
+    echo "[entrypoint] stage: update_steamcmd skipped (AUTO_UPDATE=${AUTO_UPDATE})"
 fi
 
+echo "[entrypoint] stage: install_framework"
 install_framework
+
+echo "[entrypoint] stage: sync_github_repo"
 sync_github_repo
+
+echo "[entrypoint] stage: launch_server"
 launch_server
