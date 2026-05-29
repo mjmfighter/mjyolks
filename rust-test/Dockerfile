@@ -1,6 +1,6 @@
 FROM    --platform=$TARGETOS/$TARGETARCH debian:bookworm-slim
 
-LABEL   author="Matthew M." maintainer="mjmfighter@steampunkvalley.com"
+LABEL   author="Matthew M."
 LABEL   org.opencontainers.image.source="https://github.com/mjmfighter/mjyolks"
 LABEL   org.opencontainers.image.licenses=MIT
 
