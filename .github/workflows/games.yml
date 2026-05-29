@@ -15,11 +15,11 @@ jobs:
       fail-fast: false
       matrix:
         tag:
-          - 7d2d
+          # - 7d2d
           - rust
-          - rust-test
-          - rust-new
-          - rust-error
+          # - rust-test
+          # - rust-new
+          # - rust-error
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3

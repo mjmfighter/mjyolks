@@ -182,12 +182,22 @@
         },
         {
             "name": "Modding Framework",
-            "description": "The modding framework to be used: carbon, oxide, vanilla.\r\nDefaults to \"vanilla\" for a non-modded server installation.",
+            "description": "The modding framework to be used.\r\nVanilla: vanilla\r\nOxide: oxide, oxide-staging\r\nCarbon: carbon, carbon-minimal, carbon-edge, carbon-edge-minimal, carbon-staging, carbon-staging-minimal, carbon-aux1, carbon-aux1-minimal, carbon-aux2, carbon-aux2-minimal, carbon-aux3, carbon-aux3-minimal, carbon-aux4, carbon-aux4-minimal\r\nThe carbon-staging and carbon-aux* options auto-select the matching Rust game beta branch. Defaults to \"vanilla\".",
             "env_variable": "FRAMEWORK",
             "default_value": "vanilla",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|in:carbon,oxide,vanilla",
+            "rules": "required|in:vanilla,carbon,carbon-minimal,carbon-edge,carbon-edge-minimal,carbon-staging,carbon-staging-minimal,carbon-aux1,carbon-aux1-minimal,carbon-aux2,carbon-aux2-minimal,carbon-aux3,carbon-aux3-minimal,carbon-aux4,carbon-aux4-minimal,oxide,oxide-staging",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update",
+            "description": "Set to 0 to skip the steamcmd update on boot (useful when pinning to a specific build). Defaults to 1 (update on every boot).",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:0,1",
             "field_type": "text"
         },
         {
@@ -208,6 +218,16 @@
             "user_viewable": true,
             "user_editable": false,
             "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Github Sync",
+            "description": "Set to 1 to sync from the Github repository on every boot. Set to 0 to skip sync even when Github URL is set. Defaults to syncing whenever Github URL is set.",
+            "env_variable": "GITHUB_SYNC",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|in:0,1",
             "field_type": "text"
         },
         {
