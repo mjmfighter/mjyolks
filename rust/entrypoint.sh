@@ -222,88 +222,98 @@ sync_github_repo() {
         return 0
     fi
 
-    echo "Cloning repository from $GITHUB_URL"
-    mkdir -p "$TMP_GIT_DIR"
+    # Tolerate clone/sync failures: one GitHub outage shouldn't take Rust down.
+    # Keep set -e inside the subshell so a half-synced tree still aborts cleanly.
+    set +e
+    (
+        set -e
 
-    local GITHUB_PHRASED_ADDRESS="$GITHUB_URL"
-    if [ -n "$GITHUB_USERNAME" ] && [ -n "$GITHUB_ACCESS_TOKEN" ]; then
-        GITHUB_PHRASED_ADDRESS="https://${GITHUB_USERNAME}:${GITHUB_ACCESS_TOKEN}@${GITHUB_URL#https://}"
-    fi
+        echo "Cloning repository from $GITHUB_URL"
+        mkdir -p "$TMP_GIT_DIR"
 
-    if [ -n "$GITHUB_BRANCH" ]; then
-        git clone --depth 1 --single-branch --branch "$GITHUB_BRANCH" "$GITHUB_PHRASED_ADDRESS" "$TMP_GIT_DIR"
-    else
-        git clone --depth 1 "$GITHUB_PHRASED_ADDRESS" "$TMP_GIT_DIR"
-    fi
-
-    cd "$TMP_GIT_DIR"
-
-    if [ -n "$GITHUB_FILE_POSTFIX_PURGE" ]; then
-        echo "Purging stale variant files ending in '$GITHUB_FILE_POSTFIX_PURGE'"
-        find . -type f -name "*$GITHUB_FILE_POSTFIX_PURGE" -delete
-    fi
-
-    if [ -n "$GITHUB_FILE_POSTFIX" ]; then
-        echo "Removing postfix '$GITHUB_FILE_POSTFIX' from files"
-        find . -type f -name "*$GITHUB_FILE_POSTFIX" -exec bash -c 'mv "$1" "${1%$2}"' _ {} "$GITHUB_FILE_POSTFIX" \;
-    fi
-
-    local SYNC_NEWER_DIRS=("carbon/extensions")
-    local SYNC_DELETE_DIRS=("carbon/plugins" "carbon/configs")
-    local SYNC_DIRS=("carbon/data" "carbon/lang" "carbon/modules" "carbon/managed/modules" "HarmonyMods_Data" "server")
-
-    local DIR
-    for DIR in "${SYNC_NEWER_DIRS[@]}"; do
-        if [ -d "$DIR" ]; then
-            echo "Syncing newer files: $DIR"
-            sync_delete_with_ignore "$TMP_GIT_DIR/$DIR" "$HOME_DIR/$DIR"
+        GITHUB_PHRASED_ADDRESS="$GITHUB_URL"
+        if [ -n "$GITHUB_USERNAME" ] && [ -n "$GITHUB_ACCESS_TOKEN" ]; then
+            GITHUB_PHRASED_ADDRESS="https://${GITHUB_USERNAME}:${GITHUB_ACCESS_TOKEN}@${GITHUB_URL#https://}"
         fi
-    done
 
-    for DIR in "${SYNC_DIRS[@]}"; do
-        if [ -d "$DIR" ]; then
-            echo "Syncing (additive): $DIR"
-            mkdir -p "$HOME_DIR/$DIR"
-            rsync -a -q "$TMP_GIT_DIR/$DIR/" "$HOME_DIR/$DIR/"
+        if [ -n "$GITHUB_BRANCH" ]; then
+            git clone --depth 1 --single-branch --branch "$GITHUB_BRANCH" "$GITHUB_PHRASED_ADDRESS" "$TMP_GIT_DIR"
+        else
+            git clone --depth 1 "$GITHUB_PHRASED_ADDRESS" "$TMP_GIT_DIR"
         fi
-    done
 
-    for DIR in "${SYNC_DELETE_DIRS[@]}"; do
-        if [ -d "$DIR" ]; then
-            echo "Syncing (with delete): $DIR"
-            sync_delete_with_ignore "$TMP_GIT_DIR/$DIR" "$HOME_DIR/$DIR"
+        cd "$TMP_GIT_DIR"
+
+        if [ -n "$GITHUB_FILE_POSTFIX_PURGE" ]; then
+            echo "Purging stale variant files ending in '$GITHUB_FILE_POSTFIX_PURGE'"
+            find . -type f -name "*$GITHUB_FILE_POSTFIX_PURGE" -delete
         fi
-    done
 
-    if [ -n "$SYNC_FILES" ]; then
-        local FILE SRC DEST
-        for FILE in $SYNC_FILES; do
-            SRC="$TMP_GIT_DIR/$FILE"
-            DEST="$HOME_DIR/$FILE"
-            if [ ! -f "$SRC" ]; then
-                echo "SYNC_FILES: $FILE not in repo, skipping"
-                continue
-            fi
-            mkdir -p "$(dirname "$DEST")"
-            if [ -f "$SRC.ignore" ]; then
-                if [ ! -e "$DEST" ]; then
-                    cp -p "$SRC" "$DEST"
-                    echo "SYNC_FILES: seeded $FILE (first boot)"
-                else
-                    echo "SYNC_FILES: $FILE has .ignore sidecar, server copy kept"
-                fi
-            else
-                cp -pf "$SRC" "$DEST"
-                echo "SYNC_FILES: copied $FILE"
+        if [ -n "$GITHUB_FILE_POSTFIX" ]; then
+            echo "Removing postfix '$GITHUB_FILE_POSTFIX' from files"
+            find . -type f -name "*$GITHUB_FILE_POSTFIX" -exec bash -c 'mv "$1" "${1%$2}"' _ {} "$GITHUB_FILE_POSTFIX" \;
+        fi
+
+        SYNC_NEWER_DIRS=("carbon/extensions")
+        SYNC_DELETE_DIRS=("carbon/plugins" "carbon/configs")
+        SYNC_DIRS=("carbon/data" "carbon/lang" "carbon/modules" "carbon/managed/modules" "HarmonyMods_Data" "server")
+
+        for DIR in "${SYNC_NEWER_DIRS[@]}"; do
+            if [ -d "$DIR" ]; then
+                echo "Syncing newer files: $DIR"
+                sync_delete_with_ignore "$TMP_GIT_DIR/$DIR" "$HOME_DIR/$DIR"
             fi
         done
-    fi
 
-    local DEPLOYED_SHA DEPLOYED_REF
-    DEPLOYED_SHA=$(git rev-parse HEAD)
-    DEPLOYED_REF=${GITHUB_BRANCH:-HEAD}
-    echo "$DEPLOYED_SHA" > "$HOME_DIR/.deployed-commit"
-    echo "Deployed commit: $DEPLOYED_SHA ($DEPLOYED_REF)"
+        for DIR in "${SYNC_DIRS[@]}"; do
+            if [ -d "$DIR" ]; then
+                echo "Syncing (additive): $DIR"
+                mkdir -p "$HOME_DIR/$DIR"
+                rsync -a -q "$TMP_GIT_DIR/$DIR/" "$HOME_DIR/$DIR/"
+            fi
+        done
+
+        for DIR in "${SYNC_DELETE_DIRS[@]}"; do
+            if [ -d "$DIR" ]; then
+                echo "Syncing (with delete): $DIR"
+                sync_delete_with_ignore "$TMP_GIT_DIR/$DIR" "$HOME_DIR/$DIR"
+            fi
+        done
+
+        if [ -n "$SYNC_FILES" ]; then
+            for FILE in $SYNC_FILES; do
+                SRC="$TMP_GIT_DIR/$FILE"
+                DEST="$HOME_DIR/$FILE"
+                if [ ! -f "$SRC" ]; then
+                    echo "SYNC_FILES: $FILE not in repo, skipping"
+                    continue
+                fi
+                mkdir -p "$(dirname "$DEST")"
+                if [ -f "$SRC.ignore" ]; then
+                    if [ ! -e "$DEST" ]; then
+                        cp -p "$SRC" "$DEST"
+                        echo "SYNC_FILES: seeded $FILE (first boot)"
+                    else
+                        echo "SYNC_FILES: $FILE has .ignore sidecar, server copy kept"
+                    fi
+                else
+                    cp -pf "$SRC" "$DEST"
+                    echo "SYNC_FILES: copied $FILE"
+                fi
+            done
+        fi
+
+        DEPLOYED_SHA=$(git rev-parse HEAD)
+        DEPLOYED_REF=${GITHUB_BRANCH:-HEAD}
+        echo "$DEPLOYED_SHA" > "$HOME_DIR/.deployed-commit"
+        echo "Deployed commit: $DEPLOYED_SHA ($DEPLOYED_REF)"
+    )
+    local CLONE_RC=$?
+    set -e
+
+    if [ $CLONE_RC -ne 0 ]; then
+        echo "WARNING: sync failed (rc=$CLONE_RC); booting on previously synced files"
+    fi
 
     cd "$HOME_DIR"
     rm -rf "$TMP_GIT_DIR" "$HOME_DIR/.ssh"
