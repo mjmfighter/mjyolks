@@ -5,9 +5,9 @@
         "update_url": null
     },
     "exported_at": "2024-04-03T13:22:34-05:00",
-    "name": "Rust (mjmfighter)",
+    "name": "Rust Live (mjmfighter)",
     "author": "support@pterodactyl.io",
-    "description": "The only aim in Rust is to survive. To do this you will need to overcome struggles such as hunger, thirst and cold. Build a fire. Build a shelter. Kill animals for meat. Protect yourself from other players, and kill them for meat. Create alliances with other players and form a town. Do whatever it takes to survive.",
+    "description": "Rust server (live variant): syncs from the 'main' branch of the configured GitHub repo on every boot. Use a GitHub fine-grained read-only PAT (Contents: Read) scoped to the one repo for GITHUB_ACCESS_TOKEN.",
     "features": [
         "steam_disk_space"
     ],
@@ -262,9 +262,29 @@
         },
         {
             "name": "Github File Postfix",
-            "description": "The postfix to remove from the github files when syncing.",
+            "description": "The postfix to strip from files in the clone before syncing (e.g. '.live' renames Foo.json.live -> Foo.json). This server's own variant postfix.",
             "env_variable": "GITHUB_FILE_POSTFIX",
-            "default_value": "",
+            "default_value": ".live",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Github File Postfix Purge",
+            "description": "The other server's variant postfix (e.g. '.test' on the live server). Files ending in this are deleted from the clone before the rename step so they don't pollute live.",
+            "env_variable": "GITHUB_FILE_POSTFIX_PURGE",
+            "default_value": ".test",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Sync Files",
+            "description": "Space-separated list of individual files to mirror-sync from the repo (e.g. 'carbon/config.json'). Repo wins unless a '<path>.ignore' sidecar exists, in which case the file is only seeded when missing.",
+            "env_variable": "SYNC_FILES",
+            "default_value": "carbon/config.json",
             "user_viewable": true,
             "user_editable": false,
             "rules": "nullable|string",
