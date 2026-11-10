@@ -245,7 +245,7 @@ sync_github_repo() {
 
     local SYNC_NEWER_DIRS=("carbon/extensions")
     local SYNC_DELETE_DIRS=("carbon/plugins" "carbon/configs")
-    local SYNC_DIRS=("carbon/data" "carbon/modules" "carbon/managed/modules" "HarmonyMods_Data" "server")
+    local SYNC_DIRS=("carbon/data" "carbon/lang" "carbon/modules" "carbon/managed/modules" "HarmonyMods_Data" "server")
 
     local DIR
     for DIR in "${SYNC_NEWER_DIRS[@]}"; do
