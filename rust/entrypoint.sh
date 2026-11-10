@@ -238,6 +238,11 @@ sync_github_repo() {
 
     cd "$TMP_GIT_DIR"
 
+    if [ -n "$GITHUB_FILE_POSTFIX_PURGE" ]; then
+        echo "Purging stale variant files ending in '$GITHUB_FILE_POSTFIX_PURGE'"
+        find . -type f -name "*$GITHUB_FILE_POSTFIX_PURGE" -delete
+    fi
+
     if [ -n "$GITHUB_FILE_POSTFIX" ]; then
         echo "Removing postfix '$GITHUB_FILE_POSTFIX' from files"
         find . -type f -name "*$GITHUB_FILE_POSTFIX" -exec bash -c 'mv "$1" "${1%$2}"' _ {} "$GITHUB_FILE_POSTFIX" \;
