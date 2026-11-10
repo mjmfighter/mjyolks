@@ -299,6 +299,12 @@ sync_github_repo() {
         done
     fi
 
+    local DEPLOYED_SHA DEPLOYED_REF
+    DEPLOYED_SHA=$(git rev-parse HEAD)
+    DEPLOYED_REF=${GITHUB_BRANCH:-HEAD}
+    echo "$DEPLOYED_SHA" > "$HOME_DIR/.deployed-commit"
+    echo "Deployed commit: $DEPLOYED_SHA ($DEPLOYED_REF)"
+
     cd "$HOME_DIR"
     rm -rf "$TMP_GIT_DIR" "$HOME_DIR/.ssh"
     echo "Finished syncing files"
