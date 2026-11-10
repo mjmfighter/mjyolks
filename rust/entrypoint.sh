@@ -275,6 +275,30 @@ sync_github_repo() {
         fi
     done
 
+    if [ -n "$SYNC_FILES" ]; then
+        local FILE SRC DEST
+        for FILE in $SYNC_FILES; do
+            SRC="$TMP_GIT_DIR/$FILE"
+            DEST="$HOME_DIR/$FILE"
+            if [ ! -f "$SRC" ]; then
+                echo "SYNC_FILES: $FILE not in repo, skipping"
+                continue
+            fi
+            mkdir -p "$(dirname "$DEST")"
+            if [ -f "$SRC.ignore" ]; then
+                if [ ! -e "$DEST" ]; then
+                    cp -p "$SRC" "$DEST"
+                    echo "SYNC_FILES: seeded $FILE (first boot)"
+                else
+                    echo "SYNC_FILES: $FILE has .ignore sidecar, server copy kept"
+                fi
+            else
+                cp -pf "$SRC" "$DEST"
+                echo "SYNC_FILES: copied $FILE"
+            fi
+        done
+    fi
+
     cd "$HOME_DIR"
     rm -rf "$TMP_GIT_DIR" "$HOME_DIR/.ssh"
     echo "Finished syncing files"
